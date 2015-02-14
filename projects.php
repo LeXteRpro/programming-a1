@@ -1,114 +1,80 @@
-<?php
-
-
-//1. connect to database
-$conn = new PDO('mysql:host=localhost;dbname=php', 'root', '');
-
-$assignment = "";
-$coursecode = "";
-$teacher = "";
-$duedate = "";
-$complete = "";
-
-
-    if (isset($_POST['submit']) ) {
-
-        $assignment = $_POST['assignment'];
-        $coursecode = $_POST['course-code'];
-        $teacher = $_POST['teacher'];
-        $duedate = $_POST['due-date'];
-        $complete = $_POST['complete'];
-      }
-
-        //user clicked "submit"
-         if (isset($_GET['assignment_id'])) {
-
-            //Update subscribers
-            $assignment_id = $_GET['assignment_id'];
-            $sql =
-                "UPDATE assignments
-                SET
-                    assignment = '$assignment',
-                    course-code = '$coursecode',
-                    teacher = '$teacher',
-                    duedate = '$duedate',
-                    complete ='$complete'
-                WHERE
-                    assignment_id = $assignment_id";
-            $conn->query($sql);
-
-            header('Location: project-display.php');
-         }
-         else {
-            //Create new subscriber
-            $sql =
-                "INSERT INTO assignments
-                (first_name,    last_name,    email   ) VALUES
-                ('$first_name', '$last_name', '$email')";
-            $conn->query($sql);
-
-            header('Location: project-display.php');
-         }
-
-
-//2. set up the query to get list of assignments
-$sql = "SELECT assignments FROM .php";
-
-//3. exeute the query & store the results
-$result = $conn->query($sql);
-
-//4. loop through the results
-foreach ($result as $row) {
-//5. output each country in <option> </option> tags
-    echo '<option>' .$row['assignment']. '</option>';
-
-}
-
-      foreach ($result as $row) {
-          $assignment = $_POST['assignment'];
-          $coursecode = $_POST['course-code'];
-          $teacher = $_POST['teacher'];
-          $duedate = $_POST['due-date'];
-          $complete = $_POST['complete'];
-        }
-
-        $action .= "?assignment_id=$assignment_id";
-
-        //disconnect
-        $conn = null;
-
-?>
-
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Assignments</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Subscriber List</title>
+        <link rel="stylesheet" href="style.css" type="text/css" />
     </head>
+
     <body>
-        <form method="post" action="<?php echo $action; ?>">
-            <div>
-                <label for="assignment">Assignment</label>
-                <input name="assignment" required value="<?php echo $assignment; ?>" />
-            </div>
-            <div>
-                <label for="course-code">Course Code:</label>
-                <input name="course-code" required value="<?php echo $coursecode; ?>" />
-            </div>
-            <div>
-                <label for="teacher">Teacher:</label>
-                <input name="teacher" required value="<?php echo $teacher; ?>" />
-            </div>
-            <div>
-                <label for="due-date">Due Date:</label>
-                <input name="due-date" required value="<?php echo $duedate; ?>">
-            </div>
-            <div>
-                <label for="complete">Complete:</label>
-                <input name="complete" required value="<?php echo $complete; ?>">
-            </div>
+        <a href="new.php">Add a new assignment</a>
+        <?php
+            //Connect
+            require_once "config.php";
 
+            // Grabbing the information from the database
+            $sql =
+                "SELECT
+                    assignment.assignment_id,
+                    assignment.name,
+                    courses.code,
+                    assignment.teacher,
+                    assignment.due_date,
+                    assignment.complete
+                FROM
+                    assignment
+                    JOIN courses ON assignment.course_code = courses.course_id";
 
-            <input type="submit" name="submit" value="Subscribe" />
-        </form>
+            //Connect to the query
+            $result = $conn->query($sql);
+
+            //HTML Table
+            ?>
+                <table>
+                    <tr>
+                        <th>Assignment</th>
+                        <th>Course Code</th>
+                        <th>Teacher</th>
+                        <th>Due Date</th>
+                        <th>Complete</th>
+                    </tr>
+                    <!-- Loop through the rows in the database -->
+                    <?php foreach ($result as $row) { ?>
+                        <tr>
+                            <td><?php echo $row['name']; ?></td>
+                            <td><?php echo $row['code']; ?></td>
+                            <td><?php echo $row['teacher']; ?></td>
+                            <td><?php echo $row['due_date']; ?></td>
+                            <td>
+                            <!-- Enter back into php mode for loop-->
+                                <?php
+                                //If assignment is incomplete, display "No" for not complete.
+                                    if ($row['complete'] == 0) {
+                                        echo "No";
+                                    }
+                                //If assignment is complete, display "Yes" for not complete.
+                                    else {
+                                        echo "Yes";
+                                    }
+                                ?>
+                            </td>
+
+                            <td>
+                            <!-- Link to the assignment_id page for the current assignment-->
+                                <a href="edit.php?assignment_id=<?php echo $row['assignment_id']; ?>">Inspect</a>
+                            </td>
+                            <td>
+                            <!--Go to Delete page for the current assignment_id-->
+                                <a href="delete.php?assignment_id=<?php echo $row['assignment_id']?>"
+                                    onclick="return confirm(\'Are you sure you want to delete this subscriber?\');">Delete</a>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </table>
+            <?php
+
+            //Disconnect
+            $conn = null;
+        ?>
     </body>
 </html>

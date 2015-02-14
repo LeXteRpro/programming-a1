@@ -12,3 +12,19 @@ CREATE TABLE `assignment-test` (
 INSERT INTO `assignment`
 	(`assignment_id`, `name`,           `course_code`, `teacher`) VALUES
 	(NULL,            'test of colors', 'L0G1M0',      'stephen');
+
+ALTER TABLE `assignment`
+CHANGE COLUMN `due_date` `due_date` VARCHAR(45) NULL DEFAULT NULL ;
+
+
+
+CREATE TABLE `courses` (
+  `course_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `code` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`course_id`),
+  UNIQUE INDEX `code_UNIQUE` (`code` ASC));
+
+
+INSERT INTO `php`.`courses` (`course_id`, `code`) VALUES (NULL, 'comp1045');
+INSERT INTO `php`.`courses` (`code`) VALUES ('gnedNo');
+INSERT INTO `php`.`courses` (`code`) VALUES ('comp1001');
